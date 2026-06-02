@@ -1,5 +1,5 @@
 services:
-  # example of HTTPS endpoint 
+  # example of HTTPS endpoint
   web:
     image: nginx:1.30
     restart: unless-stopped
