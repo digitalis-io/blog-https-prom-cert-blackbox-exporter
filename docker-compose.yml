@@ -1,0 +1,60 @@
+services:
+  # example of HTTPS endpoint 
+  web:
+    image: nginx:1.30
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    # expose 8443 so Prometheus can reach it via the network
+    ports:
+      - "8443:8443"
+    # test it with curl: curl -v --cacert certs/ca.crt https://localhost:8443
+    # test it with openssl: openssl s_client -connect localhost:8443 -CAfile certs/ca.crt
+    # check only expirely date: openssl x509 -in certs/server.crt -noout -dates
+
+  # install the blackbox-exporter
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.28.0
+    restart: unless-stopped
+    depends_on:
+      - web
+    command: ['--config.file=/etc/blackbox_exporter/blackbox.yml']
+    volumes:
+      - ./blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro
+      - ./certs:/etc/blackbox_exporter/certs:ro
+    ports:
+      - "9115:9115"
+  # test it on http://localhost:9115/metrics
+  # test the example endpoint http://localhost:9115/probe?target=https://web:8443&module=https_2xx
+  # look for metrics like:
+  # probe_http_ssl 1
+  # probe_ssl_earliest_cert_expiry 1.781127198e+09
+
+  prometheus:
+    image: quay.io/prometheus/prometheus:v3.11.2
+    restart: unless-stopped
+    depends_on:
+      - blackbox-exporter
+      - alertmanager
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus:/prometheus
+  # test it on http://localhost:9090/query
+
+  alertmanager:
+    image: quay.io/prometheus/alertmanager:v0.32.0
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+  # test it on http://localhost:9093/#/alerts
+
+volumes:
+  prometheus: {}
