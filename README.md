@@ -1,4 +1,32 @@
+<p align="center">
+  <a href="https://digitalis.io">
+    <img src="https://digitalis-marketplace-assets.s3.us-east-1.amazonaws.com/DigitalisDigital_DigitalisFullLogoGradient+-+medium.png" alt="Digitalis.IO" width="300">
+  </a>
+</p>
+
+<p align="center">
+  <em>Built and maintained by <a href="https://digitalis.io">Digitalis.IO</a></em>
+</p>
+
 # Monitoring HTTPS Certificate Expiry with Prometheus and Blackbox Exporter
+
+Monitor TLS certificate expiry automatically with Prometheus and Blackbox Exporter using a local Docker Compose stack.
+
+## Quick Start
+
+```bash
+git clone https://github.com/digitalis-io/blog-https-prom-cert-blackbox-exporter
+cd blog-https-prom-cert-blackbox-exporter
+./generate-certs.sh 30
+docker compose up -d
+```
+
+| Service | URL |
+|---|---|
+| Prometheus | http://localhost:9090 |
+| Alertmanager | http://localhost:9093 |
+| Blackbox Exporter | http://localhost:9115 |
+| NGINX (HTTPS) | https://localhost:8443 |
 
 ## Why monitor certificate expiry
 
@@ -640,3 +668,7 @@ Going through the components one at a time is the point. When something breaks (
 ⸻
 
 If you'd like support implementing or scaling this kind of setup, the team at [Digitalis.io](https://digitalis.io/contact-us) has extensive experience in observability, monitoring, and production operations. We support organisations across the full lifecycle, from initial design and implementation to fully managed services that keep systems reliable, secure, and operating over time.
+
+## Contact
+
+This project is maintained by [Digitalis.io](https://digitalis.io). For support, visit [digitalis.io/contact](https://digitalis.io/contact).
