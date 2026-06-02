@@ -1,0 +1,28 @@
+groups:
+  - name: certificate-alerts
+    rules:
+      # Fires while the probe is still succeeding but the certificate is
+      # close to its expiry date. This is the main "warn me in time to
+      # renew" alert.
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry > 0 and (probe_ssl_earliest_cert_expiry - time()) / 86400 < 30
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate for {{ $labels.instance }} expires in less than 30 days."
+
+      # Fires when the probe itself fails. Blackbox Exporter does not
+      # export probe_ssl_earliest_cert_expiry when the TLS handshake
+      # fails, so the rule above goes silent in exactly the cases that
+      # matter most: expired cert, hostname mismatch, broken trust chain,
+      # endpoint unreachable. This rule is the safety net.
+      - alert: BlackboxProbeFailed
+        expr: probe_success == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Blackbox probe failing for {{ $labels.instance }}"
+          description: "Probe has been failing for 5+ minutes. The endpoint is unreachable or its TLS handshake is broken (expired certificate, hostname mismatch, untrusted CA, ...)."

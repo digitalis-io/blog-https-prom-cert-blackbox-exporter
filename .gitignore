@@ -1,0 +1,7 @@
+# TLS material — never commit
+# The certs/ directory is generated locally by ./generate-certs.sh
+certs/*.key
+certs/*.crt
+certs/*.csr
+certs/*.srl
+certs/*.ext
